@@ -12,13 +12,23 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.telephony.Call;
+import javax.telephony.InvalidArgumentException;
+import javax.telephony.InvalidPartyException;
+import javax.telephony.InvalidStateException;
+import javax.telephony.JtapiPeer;
+import javax.telephony.JtapiPeerFactory;
+import javax.telephony.JtapiPeerUnavailableException;
+import javax.telephony.MethodNotSupportedException;
+import javax.telephony.PrivilegeViolationException;
+import javax.telephony.Provider;
+import javax.telephony.ProviderUnavailableException;
+import javax.telephony.ResourceUnavailableException;
 
 import org.asteriskjava.manager.AuthenticationFailedException;
-import org.asteriskjava.manager.ManagerConnection;
-import org.asteriskjava.manager.ManagerConnectionFactory;
 import org.asteriskjava.manager.TimeoutException;
-import org.asteriskjava.manager.action.OriginateAction;
-import org.asteriskjava.manager.response.ManagerResponse;
+
+import com.headissue.asterisk.jtapi.AsteriskJtapiProvider;
 
 public class NumberGenerator {
 
@@ -123,35 +133,56 @@ public class NumberGenerator {
 	}
 	
 	public void generateValidNumbers() throws IllegalStateException, IOException, AuthenticationFailedException, TimeoutException, InterruptedException{
-		int port=0;
-		ManagerConnectionFactory managerConnectionFactory = new ManagerConnectionFactory("hostname", port, "username", "password");
-		ManagerConnection managerConnection = managerConnectionFactory.createManagerConnection();
-		// connect to Asterisk and log in
-		managerConnection.login();
-		
-        String tel_origen = "ORIGEN"; 
-        String tel_destino = "DESTINO"; 
-        String callerid = "CALLER_ID"; 
-        String channel = "SIP/John"; 
 
-        OriginateAction originateAction = new OriginateAction(); 
-        originateAction.setChannel(channel); 
-        originateAction.setContext("default"); 
-        originateAction.setExten(tel_origen); 
-        originateAction.setApplication("Dial"); 
-        originateAction.setData("data"); 
-        originateAction.setCallerId(callerid); 
-        originateAction.setPriority(Integer.valueOf(1)); 
-        originateAction.setTimeout(3000l); 
-        originateAction.setAsync(Boolean.TRUE); 
-        ManagerResponse originateResponse = 
-        managerConnection.sendAction(originateAction, 5000);
-        
-        System.out.println(originateResponse.getResponse());
-     
-        // and finally log off and disconnect
-        managerConnection.logoff();
-	
+		try {
+			
+			
+//			AsteriskJtapiProvider asteriskJtapiProvider = new AsteriskJtapiProvider();
+//			CallId callId = asteriskJtapiProvider.createCall(new CallerImpl() , "192.168.1.250", "1102", "095763885");
+////			AsteriskCall asteriskCall = new AsteriskCall();
+////			createCall(net.sourceforge.gjtapi.CallId _callId,
+////                    java.lang.String _addr,
+////                    java.lang.String _terminal,
+////                    java.lang.String _destination)  
+//			AsteriskJtapiProvider asteriskJtapiProvider = new AsteriskJtapiProvider();
+//			asteriskJtapiProvider.createCall(null, "192.168.1.250", "1102", "9095763885");
+			JtapiPeer peer = JtapiPeerFactory.getJtapiPeer(null);
+			Provider provider = peer.getProvider("Asterisk;Server=192.168.1.250;Login=1102;Password=1102pwd");
+			Call call = provider.createCall();
+			
+//			// Realizamos una llamada  
+            call.connect(provider.getTerminal("1102"), provider.getAddress("192.168.1.250"), "9095763885");  
+//            
+//            // Finalizamos el proveedor
+            provider.shutdown();
+			
+		} catch (ProviderUnavailableException e) {
+			// TODO: handle exception
+			System.out.println(e.getCause());
+		} catch (ResourceUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PrivilegeViolationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println(e.getCause());
+		} catch (InvalidPartyException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidStateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MethodNotSupportedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JtapiPeerUnavailableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+		
 	}
 	
 }
