@@ -12,23 +12,20 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.telephony.Call;
 import javax.telephony.InvalidArgumentException;
 import javax.telephony.InvalidPartyException;
 import javax.telephony.InvalidStateException;
-import javax.telephony.JtapiPeer;
-import javax.telephony.JtapiPeerFactory;
 import javax.telephony.JtapiPeerUnavailableException;
 import javax.telephony.MethodNotSupportedException;
 import javax.telephony.PrivilegeViolationException;
-import javax.telephony.Provider;
-import javax.telephony.ProviderUnavailableException;
 import javax.telephony.ResourceUnavailableException;
 
 import org.asteriskjava.manager.AuthenticationFailedException;
+import org.asteriskjava.manager.ManagerConnection;
+import org.asteriskjava.manager.ManagerConnectionFactory;
 import org.asteriskjava.manager.TimeoutException;
-
-import com.headissue.asterisk.jtapi.AsteriskJtapiProvider;
+import org.asteriskjava.manager.action.OriginateAction;
+import org.asteriskjava.manager.response.ManagerResponse;
 
 public class NumberGenerator {
 
@@ -70,38 +67,38 @@ public class NumberGenerator {
 		frmGeneradorDeNumeros.setBounds(100, 100, 289, 365);
 		frmGeneradorDeNumeros.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmGeneradorDeNumeros.getContentPane().setLayout(null);
-		
+
 		JLabel lblNewLabel = new JLabel("Número Base :");
 		lblNewLabel.setFont(new Font("Dialog", Font.BOLD, 14));
 		lblNewLabel.setBounds(24, 12, 127, 15);
 		frmGeneradorDeNumeros.getContentPane().add(lblNewLabel);
-		
+
 		baseNumber = new JTextField();
 		baseNumber.setFont(new Font("Dialog", Font.BOLD, 14));
 		baseNumber.setBounds(150, 10, 94, 19);
 		frmGeneradorDeNumeros.getContentPane().add(baseNumber);
 		baseNumber.setColumns(10);
-		
+
 		JLabel lblNewLabel_1 = new JLabel("Cantidad :");
 		lblNewLabel_1.setFont(new Font("Dialog", Font.BOLD, 14));
 		lblNewLabel_1.setBounds(59, 39, 82, 17);
 		frmGeneradorDeNumeros.getContentPane().add(lblNewLabel_1);
-		
+
 		amount = new JTextField();
 		amount.setFont(new Font("Dialog", Font.BOLD, 14));
 		amount.setBounds(150, 39, 43, 19);
 		frmGeneradorDeNumeros.getContentPane().add(amount);
 		amount.setColumns(10);
-		
+
 		JProgressBar progressBar = new JProgressBar();
 		progressBar.setBounds(22, 105, 238, 19);
 		frmGeneradorDeNumeros.getContentPane().add(progressBar);
-		
+
 		JTextPane textPane = new JTextPane();
 		textPane.setEditable(false);
 		textPane.setBounds(59, 136, 173, 176);
 		frmGeneradorDeNumeros.getContentPane().add(textPane);
-		
+
 		generate = new JButton("Generar");
 		generate.addMouseListener(new MouseAdapter() {
 			@Override
@@ -124,6 +121,27 @@ public class NumberGenerator {
 				} catch (InterruptedException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
+				} catch (JtapiPeerUnavailableException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvalidArgumentException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (ResourceUnavailableException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvalidStateException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (PrivilegeViolationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (MethodNotSupportedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (InvalidPartyException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 			}
 		});
@@ -131,58 +149,53 @@ public class NumberGenerator {
 		generate.setBounds(89, 68, 104, 25);
 		frmGeneradorDeNumeros.getContentPane().add(generate);
 	}
-	
-	public void generateValidNumbers() throws IllegalStateException, IOException, AuthenticationFailedException, TimeoutException, InterruptedException{
 
-		try {
-			
-			
-//			AsteriskJtapiProvider asteriskJtapiProvider = new AsteriskJtapiProvider();
-//			CallId callId = asteriskJtapiProvider.createCall(new CallerImpl() , "192.168.1.250", "1102", "095763885");
-////			AsteriskCall asteriskCall = new AsteriskCall();
-////			createCall(net.sourceforge.gjtapi.CallId _callId,
-////                    java.lang.String _addr,
-////                    java.lang.String _terminal,
-////                    java.lang.String _destination)  
-//			AsteriskJtapiProvider asteriskJtapiProvider = new AsteriskJtapiProvider();
-//			asteriskJtapiProvider.createCall(null, "192.168.1.250", "1102", "9095763885");
-			JtapiPeer peer = JtapiPeerFactory.getJtapiPeer(null);
-			Provider provider = peer.getProvider("Asterisk;Server=192.168.1.250;Login=1102;Password=1102pwd");
-			Call call = provider.createCall();
-			
-//			// Realizamos una llamada  
-            call.connect(provider.getTerminal("1102"), provider.getAddress("192.168.1.250"), "9095763885");  
-//            
-//            // Finalizamos el proveedor
-            provider.shutdown();
-			
-		} catch (ProviderUnavailableException e) {
-			// TODO: handle exception
-			System.out.println(e.getCause());
-		} catch (ResourceUnavailableException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PrivilegeViolationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println(e.getCause());
-		} catch (InvalidPartyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (MethodNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JtapiPeerUnavailableException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
-		
+	public void generateValidNumbers() throws IllegalStateException,
+			IOException, AuthenticationFailedException, TimeoutException,
+			InterruptedException, JtapiPeerUnavailableException,
+			InvalidArgumentException, ResourceUnavailableException,
+			InvalidStateException, PrivilegeViolationException,
+			MethodNotSupportedException, InvalidPartyException {
+
+		ManagerConnectionFactory managerConnectionFactory = new ManagerConnectionFactory(
+				"172.16.100.93", "admin", "amp111");
+		ManagerConnection managerConnection = managerConnectionFactory
+				.createManagerConnection();
+
+		// connect to Asterisk and log in
+		managerConnection.login();
+		System.out.println("Login OK");
+
+		OriginateAction originateAction = new OriginateAction();
+		// originateAction.setCallerId("6001");
+		originateAction.setChannel("SIP/6001");
+		originateAction.setContext("default");
+		originateAction.setExten("100");
+		originateAction.setPriority(new Integer(1));
+		originateAction.setTimeout(30L);
+
+		// send the originate action and wait for a maximum of 30 seconds for
+		// Asterisk
+		// to send a reply
+		ManagerResponse originateResponse = managerConnection.sendAction(
+				originateAction, 30000);
+
+		// print out whether the originate succeeded or not
+		System.out.println(originateResponse.getResponse());
+
+		// and finally log off and disconnect
+		managerConnection.logoff();
+
+		// JtapiPeer peer = JtapiPeerFactory.getJtapiPeer(null);
+		// Provider provider = peer
+		// .getProvider(("com.headissue.asterisk.jtapi.gjtapi.AsteriskProvider;Server=172.16.100.93;Port=5038;Login=admin;Password=amp111;IncomingContext=internal;TerminalContext=internal;OutgoingContext=internal"));
+		// Terminal terminal = provider.getTerminal("6001");
+		// System.out.println(terminal.getAddresses());
+		// System.out.println("*****************************");
+		// CallControlCall call = (CallControlCall) provider.createCall();
+		// System.out.println("*****************************");
+		// call.connect(terminal, terminal.getAddresses()[0], "100");
+		// provider.shutdown();
+
 	}
-	
 }
