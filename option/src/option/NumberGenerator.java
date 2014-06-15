@@ -15,10 +15,15 @@ import javax.swing.JTextPane;
 import javax.telephony.InvalidArgumentException;
 import javax.telephony.InvalidPartyException;
 import javax.telephony.InvalidStateException;
+import javax.telephony.JtapiPeer;
+import javax.telephony.JtapiPeerFactory;
 import javax.telephony.JtapiPeerUnavailableException;
 import javax.telephony.MethodNotSupportedException;
 import javax.telephony.PrivilegeViolationException;
+import javax.telephony.Provider;
 import javax.telephony.ResourceUnavailableException;
+import javax.telephony.Terminal;
+import javax.telephony.callcontrol.CallControlCall;
 
 import org.asteriskjava.manager.AuthenticationFailedException;
 import org.asteriskjava.manager.ManagerConnection;
@@ -26,6 +31,8 @@ import org.asteriskjava.manager.ManagerConnectionFactory;
 import org.asteriskjava.manager.TimeoutException;
 import org.asteriskjava.manager.action.OriginateAction;
 import org.asteriskjava.manager.response.ManagerResponse;
+
+import com.headissue.asterisk.jtapi.gjtapi.AsteriskProvider;
 
 public class NumberGenerator {
 
@@ -167,35 +174,28 @@ public class NumberGenerator {
 		System.out.println("Login OK");
 
 		OriginateAction originateAction = new OriginateAction();
-		// originateAction.setCallerId("6001");
+		originateAction.setActionId("Call#1");
+		originateAction.setData("Atende gato...");
+		originateAction.setApplication("NumberGenerator");
+
 		originateAction.setChannel("SIP/6001");
-		originateAction.setContext("default");
+		originateAction.setCallerId("6001");
+		originateAction.setContext("from-internal");
 		originateAction.setExten("100");
 		originateAction.setPriority(new Integer(1));
-		originateAction.setTimeout(30L);
+		originateAction.setTimeout(new Long(60000));
 
 		// send the originate action and wait for a maximum of 30 seconds for
 		// Asterisk
 		// to send a reply
 		ManagerResponse originateResponse = managerConnection.sendAction(
-				originateAction, 30000);
+				originateAction, 60000);
 
 		// print out whether the originate succeeded or not
 		System.out.println(originateResponse.getResponse());
+		System.out.println(originateResponse.getMessage());
 
 		// and finally log off and disconnect
 		managerConnection.logoff();
-
-		// JtapiPeer peer = JtapiPeerFactory.getJtapiPeer(null);
-		// Provider provider = peer
-		// .getProvider(("com.headissue.asterisk.jtapi.gjtapi.AsteriskProvider;Server=172.16.100.93;Port=5038;Login=admin;Password=amp111;IncomingContext=internal;TerminalContext=internal;OutgoingContext=internal"));
-		// Terminal terminal = provider.getTerminal("6001");
-		// System.out.println(terminal.getAddresses());
-		// System.out.println("*****************************");
-		// CallControlCall call = (CallControlCall) provider.createCall();
-		// System.out.println("*****************************");
-		// call.connect(terminal, terminal.getAddresses()[0], "100");
-		// provider.shutdown();
-
 	}
 }
