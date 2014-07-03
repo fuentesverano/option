@@ -4,7 +4,7 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
+import java.net.InetAddress;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -12,27 +12,9 @@ import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-import javax.telephony.InvalidArgumentException;
-import javax.telephony.InvalidPartyException;
-import javax.telephony.InvalidStateException;
-import javax.telephony.JtapiPeer;
-import javax.telephony.JtapiPeerFactory;
-import javax.telephony.JtapiPeerUnavailableException;
-import javax.telephony.MethodNotSupportedException;
-import javax.telephony.PrivilegeViolationException;
-import javax.telephony.Provider;
-import javax.telephony.ResourceUnavailableException;
-import javax.telephony.Terminal;
-import javax.telephony.callcontrol.CallControlCall;
 
-import org.asteriskjava.manager.AuthenticationFailedException;
-import org.asteriskjava.manager.ManagerConnection;
-import org.asteriskjava.manager.ManagerConnectionFactory;
-import org.asteriskjava.manager.TimeoutException;
-import org.asteriskjava.manager.action.OriginateAction;
-import org.asteriskjava.manager.response.ManagerResponse;
-
-import com.headissue.asterisk.jtapi.gjtapi.AsteriskProvider;
+import net.sourceforge.peers.JavaConfig;
+import net.sourceforge.peers.media.MediaMode;
 
 public class NumberGenerator {
 
@@ -110,46 +92,7 @@ public class NumberGenerator {
 		generate.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				System.out.println("Click");
-				try {
-					generateValidNumbers();
-				} catch (IllegalStateException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (AuthenticationFailedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (TimeoutException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (JtapiPeerUnavailableException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (InvalidArgumentException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (ResourceUnavailableException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (InvalidStateException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (PrivilegeViolationException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (MethodNotSupportedException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (InvalidPartyException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+				generateValidNumbers();
 			}
 		});
 		generate.setFont(new Font("Dialog", Font.BOLD, 14));
@@ -157,45 +100,43 @@ public class NumberGenerator {
 		frmGeneradorDeNumeros.getContentPane().add(generate);
 	}
 
-	public void generateValidNumbers() throws IllegalStateException,
-			IOException, AuthenticationFailedException, TimeoutException,
-			InterruptedException, JtapiPeerUnavailableException,
-			InvalidArgumentException, ResourceUnavailableException,
-			InvalidStateException, PrivilegeViolationException,
-			MethodNotSupportedException, InvalidPartyException {
+	public void generateValidNumbers() {
 
-		ManagerConnectionFactory managerConnectionFactory = new ManagerConnectionFactory(
-				"172.16.100.93", "admin", "amp111");
-		ManagerConnection managerConnection = managerConnectionFactory
-				.createManagerConnection();
+		JavaConfig javaConfig = this.createJavaConfig();
+		PhoneListener phoneListener = new DummyPhoneListener();
+		Phone phone = new Phone(javaConfig, phoneListener);
+		phone.register();
+		phone.dial("100");
+		phone.recordCall();
+		try {
+			Thread.sleep(20000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		phone.hangUp();
+		phone.unregister();
+	}
 
-		// connect to Asterisk and log in
-		managerConnection.login();
-		System.out.println("Login OK");
+	private JavaConfig createJavaConfig() {
+		try {
+			JavaConfig javaConfig = new JavaConfig();
+			
+			// user configuration
+			javaConfig.setUserPart("6002");
+			javaConfig.setPassword("unsecurepassword");
 
-		OriginateAction originateAction = new OriginateAction();
-		originateAction.setActionId("Call#1");
-		originateAction.setData("Atende gato...");
-		originateAction.setApplication("NumberGenerator");
-
-		originateAction.setChannel("SIP/6001");
-		originateAction.setCallerId("6001");
-		originateAction.setContext("from-internal");
-		originateAction.setExten("100");
-		originateAction.setPriority(new Integer(1));
-		originateAction.setTimeout(new Long(60000));
-
-		// send the originate action and wait for a maximum of 30 seconds for
-		// Asterisk
-		// to send a reply
-		ManagerResponse originateResponse = managerConnection.sendAction(
-				originateAction, 60000);
-
-		// print out whether the originate succeeded or not
-		System.out.println(originateResponse.getResponse());
-		System.out.println(originateResponse.getMessage());
-
-		// and finally log off and disconnect
-		managerConnection.logoff();
+			javaConfig.setDomain("192.168.1.102");
+			javaConfig.setLocalInetAddress(InetAddress
+					.getByName("192.168.1.104"));
+			javaConfig.setMediaDebug(true);
+			javaConfig.setMediaMode(MediaMode.captureAndPlayback);
+			javaConfig.setMediaFile("file");
+			javaConfig.setOutboundProxy(null);
+			javaConfig.setPublicInetAddress(null);
+			return javaConfig;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }
