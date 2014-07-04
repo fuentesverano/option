@@ -275,16 +275,8 @@ public class Phone {
 		  JavaxSoundManager javaxSoundManager = (JavaxSoundManager)
 		 ua.getSoundManager();
 		  byte[] readData = javaxSoundManager.readData();
-		// javaxSoundManager.init();
-		// javaxSoundManager.readData();
-		// ByteArrayOutputStream byteArrayOutputStream = new
-		// ByteArrayOutputStream();
-		// byteArrayOutputStream.write(b);
-		MidDialogRequestManager midDialogRequestManager = ua.getUas()
-				.getMidDialogRequestManager();
-		midDialogRequestManager.getClass();
-		DialogManager dialogManager = ua.getDialogManager();
-		Dialog dialog = dialogManager.getDialogCollection().iterator().next();
+//		DialogManager dialogManager = ua.getDialogManager();
+//		Dialog dialog = dialogManager.getDialogCollection().iterator().next();
 //		Dialog dialog = dialogManager.getDialog(activeCallReq);
 		
 		MediaManager mediaManager = ua.getMediaManager();
@@ -293,7 +285,7 @@ public class Phone {
 			WaveFileManager waveFileManager = new WaveFileManager();
 			Wave wave = new Wave(new WaveHeader(), readData);
 			waveFileManager.setWave(wave);
-			waveFileManager.saveWaveAsFile("callRecord.wav");
+			waveFileManager.saveWaveAsFile("recordCalls/record100.wav");
 		}
 	}
 }

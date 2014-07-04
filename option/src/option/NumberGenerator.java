@@ -107,13 +107,13 @@ public class NumberGenerator {
 		Phone phone = new Phone(javaConfig, phoneListener);
 		phone.register();
 		phone.dial("100");
-		phone.recordCall();
 		try {
-			Thread.sleep(20000);
+			Thread.sleep(10000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		phone.recordCall();
 		phone.hangUp();
 		phone.unregister();
 	}
