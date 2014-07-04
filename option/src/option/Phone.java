@@ -254,7 +254,6 @@ public class Phone {
 			} else {
 				System.out.println("pick up");
 			}
-			ua.getSoundManager().init();
 //			 listener.onPickup(phone);
 		}
 
