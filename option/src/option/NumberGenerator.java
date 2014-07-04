@@ -106,9 +106,9 @@ public class NumberGenerator {
 		PhoneListener phoneListener = new DummyPhoneListener();
 		Phone phone = new Phone(javaConfig, phoneListener);
 		phone.register();
-		phone.dial("100");
+		phone.dial("6001");
 		try {
-			Thread.sleep(10000);
+			Thread.sleep(20000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -129,9 +129,9 @@ public class NumberGenerator {
 			javaConfig.setDomain("192.168.1.102");
 			javaConfig.setLocalInetAddress(InetAddress
 					.getByName("192.168.1.104"));
-			javaConfig.setMediaDebug(true);
+			javaConfig.setMediaDebug(false);
 			javaConfig.setMediaMode(MediaMode.captureAndPlayback);
-			javaConfig.setMediaFile("file");
+//			javaConfig.setMediaFile("file");
 			javaConfig.setOutboundProxy(null);
 			javaConfig.setPublicInetAddress(null);
 			return javaConfig;

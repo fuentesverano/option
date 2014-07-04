@@ -1,5 +1,6 @@
 package option;
 
+import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
@@ -10,6 +11,7 @@ import net.sourceforge.peers.Config;
 import net.sourceforge.peers.FileLogger;
 import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.javaxsound.JavaxSoundManager;
+import net.sourceforge.peers.media.AbstractSoundManager;
 import net.sourceforge.peers.media.FileReader;
 import net.sourceforge.peers.media.MediaManager;
 import net.sourceforge.peers.sip.core.useragent.MidDialogRequestManager;
@@ -20,7 +22,11 @@ import net.sourceforge.peers.sip.transactionuser.Dialog;
 import net.sourceforge.peers.sip.transactionuser.DialogManager;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
+import net.sourceforge.peers.sip.transport.TransportManager;
 
+import com.musicg.fingerprint.FingerprintManager;
+import com.musicg.fingerprint.FingerprintSimilarity;
+import com.musicg.fingerprint.FingerprintSimilarityComputer;
 import com.musicg.wave.Wave;
 import com.musicg.wave.WaveFileManager;
 import com.musicg.wave.WaveHeader;
@@ -49,10 +55,12 @@ public class Phone {
 		this.phone = this;
 		this.logger = new FileLogger(null);
 		try {
-			JavaxSoundManager javaxSoundManager = new JavaxSoundManager(false,
-					logger, null);
+			RecordManager recordManager = new RecordManager();
+			// JavaxSoundManager javaxSoundManager = new
+			// JavaxSoundManager(false,
+			// logger, null);
 			ua = new UserAgent(new PhoneSipListener(), config, logger,
-					javaxSoundManager);
+					recordManager);
 		} catch (SocketException e) {
 			rethrow("failed to create phone", e);
 		}
@@ -246,14 +254,12 @@ public class Phone {
 			} else {
 				System.out.println("pick up");
 			}
-
-			// recordCall(sipResponse);
-			// listener.onPickup(phone);
+			ua.getSoundManager().init();
+//			 listener.onPickup(phone);
 		}
 
 		@Override
 		public void error(SipResponse sipResponse) {
-			// logger.error("error sip!");
 			System.out.println("error sip -- " + sipResponse.getReasonPhrase());
 
 			if (ringLatch != null) {
@@ -272,20 +278,25 @@ public class Phone {
 
 	public void recordCall() {
 
-		  JavaxSoundManager javaxSoundManager = (JavaxSoundManager)
-		 ua.getSoundManager();
-		  byte[] readData = javaxSoundManager.readData();
-//		DialogManager dialogManager = ua.getDialogManager();
-//		Dialog dialog = dialogManager.getDialogCollection().iterator().next();
-//		Dialog dialog = dialogManager.getDialog(activeCallReq);
-		
-		MediaManager mediaManager = ua.getMediaManager();
-		FileReader fileReader = mediaManager.getFileReader();
-		if (readData !=null) {
-			WaveFileManager waveFileManager = new WaveFileManager();
+		RecordManager recordManager = (RecordManager) ua.getSoundManager();
+		byte[] readData = recordManager.readData();
+		if (readData != null) {
 			Wave wave = new Wave(new WaveHeader(), readData);
+			WaveFileManager waveFileManager = new WaveFileManager();
 			waveFileManager.setWave(wave);
-			waveFileManager.saveWaveAsFile("recordCalls/record100.wav");
+			waveFileManager.saveWaveAsFile("recordCalls/pablo.wav");
+			
+			Wave answer = new Wave("recordCalls/recordAAAA.wav");
+			FingerprintManager fingerprintManager = new FingerprintManager();
+			byte[] fingerprint = fingerprintManager.extractFingerprint(wave);
+			byte[] f2 = fingerprintManager.extractFingerprint(answer);
+			
+			FingerprintSimilarityComputer fingerprintSimilarityComputer = new FingerprintSimilarityComputer(fingerprint, f2);
+			FingerprintSimilarity fingerprintsSimilarity = fingerprintSimilarityComputer.getFingerprintsSimilarity();
+			float similarity = fingerprintsSimilarity.getSimilarity();
+			float score = fingerprintsSimilarity.getScore();
+			System.out.println("Similarity :" +similarity);
+			System.out.println("Score :" +score);
 		}
 	}
 }
