@@ -29,7 +29,6 @@ public class RecordManager extends AbstractSoundManager{
 	public int writeData(byte[] bytes, int off, int len) {
 		try {
 			byteArrayOutputStream.write(bytes);
-			System.out.println("Size: "+byteArrayOutputStream.size());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

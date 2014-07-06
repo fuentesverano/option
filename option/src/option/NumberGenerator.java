@@ -4,7 +4,10 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.net.InetAddress;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -16,17 +19,25 @@ import javax.swing.JTextPane;
 import net.sourceforge.peers.JavaConfig;
 import net.sourceforge.peers.media.MediaMode;
 
+import com.musicg.fingerprint.FingerprintManager;
+import com.musicg.fingerprint.FingerprintSimilarity;
+import com.musicg.fingerprint.FingerprintSimilarityComputer;
+import com.musicg.wave.Wave;
+import com.musicg.wave.WaveFileManager;
+import com.musicg.wave.WaveHeader;
+
 public class NumberGenerator {
 
 	private JFrame frmGeneradorDeNumeros;
 	private JTextField baseNumber;
 	private JTextField amount;
 	private JButton generate;
-
+	
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -104,17 +115,16 @@ public class NumberGenerator {
 
 		JavaConfig javaConfig = this.createJavaConfig();
 		PhoneListener phoneListener = new DummyPhoneListener();
-		Phone phone = new Phone(javaConfig, phoneListener);
+		Phone phone = new Phone(javaConfig, false, phoneListener);
 		phone.register();
 		phone.dial("6001");
 		try {
-			Thread.sleep(20000);
+			Thread.sleep(5000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		phone.recordCall();
 		phone.hangUp();
+		phone.recordCall();
 		phone.unregister();
 	}
 

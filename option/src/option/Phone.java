@@ -1,8 +1,9 @@
 package option;
 
-import java.net.DatagramSocket;
+import java.io.File;
 import java.net.SocketException;
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -11,18 +12,11 @@ import net.sourceforge.peers.Config;
 import net.sourceforge.peers.FileLogger;
 import net.sourceforge.peers.Logger;
 import net.sourceforge.peers.javaxsound.JavaxSoundManager;
-import net.sourceforge.peers.media.AbstractSoundManager;
-import net.sourceforge.peers.media.FileReader;
-import net.sourceforge.peers.media.MediaManager;
-import net.sourceforge.peers.sip.core.useragent.MidDialogRequestManager;
 import net.sourceforge.peers.sip.core.useragent.SipListener;
 import net.sourceforge.peers.sip.core.useragent.UserAgent;
 import net.sourceforge.peers.sip.syntaxencoding.SipUriSyntaxException;
-import net.sourceforge.peers.sip.transactionuser.Dialog;
-import net.sourceforge.peers.sip.transactionuser.DialogManager;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
-import net.sourceforge.peers.sip.transport.TransportManager;
 
 import com.musicg.fingerprint.FingerprintManager;
 import com.musicg.fingerprint.FingerprintSimilarity;
@@ -47,18 +41,29 @@ public class Phone {
 	// private Dialog dialog;
 	private SipRequest activeCallReq;
 
-	private Logger logger;
+	private Logger logger = new FileLogger(null);;
+	
+	private boolean recordCalls =  true;
+	private static Set<byte[]> invalidFingerprints = new HashSet<byte[]>();
 
-	public Phone(Config config, PhoneListener listener) {
+	public Phone(Config config, boolean recordCalls, PhoneListener listener) {
 		this.config = config;
+		this.recordCalls=recordCalls;
 		this.listener = listener;
 		this.phone = this;
-		this.logger = new FileLogger(null);
+		
 		try {
+			
+			File folder = new File("answers/");
+			File[] files = folder.listFiles();
+			for (File file : files) {
+				Wave answer = new Wave(file.getPath());
+				FingerprintManager fingerprintManager = new FingerprintManager();
+				byte[] fingerprint = fingerprintManager.extractFingerprint(answer);
+				invalidFingerprints.add(fingerprint);
+			}
+			
 			RecordManager recordManager = new RecordManager();
-			// JavaxSoundManager javaxSoundManager = new
-			// JavaxSoundManager(false,
-			// logger, null);
 			ua = new UserAgent(new PhoneSipListener(), config, logger,
 					recordManager);
 		} catch (SocketException e) {
@@ -281,21 +286,23 @@ public class Phone {
 		byte[] readData = recordManager.readData();
 		if (readData != null) {
 			Wave wave = new Wave(new WaveHeader(), readData);
-			WaveFileManager waveFileManager = new WaveFileManager();
-			waveFileManager.setWave(wave);
-			waveFileManager.saveWaveAsFile("recordCalls/pablo.wav");
+			if (recordCalls) {
+				WaveFileManager waveFileManager = new WaveFileManager();
+				waveFileManager.setWave(wave);
+				waveFileManager.saveWaveAsFile("recordCalls/pablo.wav");
+			}
 			
-			Wave answer = new Wave("recordCalls/recordAAAA.wav");
 			FingerprintManager fingerprintManager = new FingerprintManager();
 			byte[] fingerprint = fingerprintManager.extractFingerprint(wave);
-			byte[] f2 = fingerprintManager.extractFingerprint(answer);
 			
-			FingerprintSimilarityComputer fingerprintSimilarityComputer = new FingerprintSimilarityComputer(fingerprint, f2);
-			FingerprintSimilarity fingerprintsSimilarity = fingerprintSimilarityComputer.getFingerprintsSimilarity();
-			float similarity = fingerprintsSimilarity.getSimilarity();
-			float score = fingerprintsSimilarity.getScore();
-			System.out.println("Similarity :" +similarity);
-			System.out.println("Score :" +score);
+			for (byte[] invalidFingerprint : invalidFingerprints) {
+				FingerprintSimilarityComputer fingerprintSimilarityComputer = new FingerprintSimilarityComputer(fingerprint, invalidFingerprint);
+				FingerprintSimilarity fingerprintsSimilarity = fingerprintSimilarityComputer.getFingerprintsSimilarity();
+				float similarity = fingerprintsSimilarity.getSimilarity();
+				float score = fingerprintsSimilarity.getScore();
+				System.out.println("Similarity :" +similarity);
+				System.out.println("Score :" +score);
+			}
 		}
 	}
 }
