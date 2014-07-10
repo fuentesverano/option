@@ -114,8 +114,7 @@ public class NumberGenerator {
 	public void generateValidNumbers() {
 
 		JavaConfig javaConfig = this.createJavaConfig();
-		PhoneListener phoneListener = new DummyPhoneListener();
-		Phone phone = new Phone(javaConfig, false, phoneListener);
+		Phone phone = new Phone(javaConfig, false);
 		phone.register();
 		phone.dial("6001");
 		try {
@@ -124,7 +123,7 @@ public class NumberGenerator {
 			e.printStackTrace();
 		}
 		phone.hangUp();
-		phone.recordCall();
+		phone.recordCall("");
 		phone.unregister();
 	}
 
