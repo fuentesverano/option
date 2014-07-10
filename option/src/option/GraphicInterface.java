@@ -37,6 +37,7 @@ public class GraphicInterface extends JFrame {
 	private JPanel contentPane;
 	private JTextField textField_first;
 	private JTextField textField_quantity;
+	private JTextField textField;
 
 	/**
 	 * Launch the application.
@@ -120,16 +121,25 @@ public class GraphicInterface extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				int cant = new Integer(textField_quantity.getText());
-				PhoneManager.callConsecutive(textField_first.getText(), cant);
+				PhoneManager.getInstance().callConsecutive(textField.getText(),textField_first.getText(), cant,true);
 			}
 		});
+		
+		JLabel lblPrefijo = new JLabel("Prefijo:");
+		lblPrefijo.setFont(new Font("Tahoma", Font.BOLD, 14));
+		tab_consecutive.add(lblPrefijo, "4, 8, right, default");
+		
+		textField = new JTextField();
+		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		tab_consecutive.add(textField, "6, 8, left, default");
+		textField.setColumns(10);
 		btnNewButton.setVerticalAlignment(SwingConstants.TOP);
 		btnNewButton.setVerticalTextPosition(SwingConstants.BOTTOM);
 		btnNewButton.setHorizontalTextPosition(SwingConstants.CENTER);
 		btnNewButton.setToolTipText("Comenzar!");
 		btnNewButton.setIcon(new ImageIcon(GraphicInterface.class.getResource("/images/iconButton2.png")));
 		btnNewButton.setHorizontalAlignment(SwingConstants.LEFT);
-		tab_consecutive.add(btnNewButton, "6, 8, center, top");
+		tab_consecutive.add(btnNewButton, "6, 12, center, top");
 		
 		JPanel tab_list = new JPanel();
 		tabbedPane.addTab("Lista", null, tab_list, "Llamar a una lista de numeros");
