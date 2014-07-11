@@ -15,6 +15,7 @@ import net.sourceforge.peers.sip.core.useragent.UserAgent;
 import net.sourceforge.peers.sip.syntaxencoding.SipUriSyntaxException;
 import net.sourceforge.peers.sip.transport.SipRequest;
 import net.sourceforge.peers.sip.transport.SipResponse;
+import option.PhoneManager.Result;
 
 import com.musicg.fingerprint.FingerprintManager;
 import com.musicg.fingerprint.FingerprintSimilarity;
@@ -31,23 +32,22 @@ public class Phone {
 	private CountDownLatch registerLatch;
 	private CountDownLatch ringLatch;
 	private SipRequest activeCallReq;
-	private boolean persistRecordCalls =  false;
 	private static Set<byte[]> invalidFingerprints = new HashSet<byte[]>();
 
-	public Phone(Config config, boolean persistRecordCalls) {
+	public Phone(Config config) {
 		this.config = config;
-		this.persistRecordCalls=persistRecordCalls;
 		try {
 			File folder = new File("invalidPatterns/");
 			File[] files = folder.listFiles();
 			for (File file : files) {
 				Wave wavePattern = new Wave(file.getPath());
 				FingerprintManager fingerprintManager = new FingerprintManager();
-				byte[] fingerprint = fingerprintManager.extractFingerprint(wavePattern);
+				byte[] fingerprint = fingerprintManager
+						.extractFingerprint(wavePattern);
 				invalidFingerprints.add(fingerprint);
 			}
-			ua = new UserAgent(new PhoneSipListener(), config, new FileLogger(null),
-					new RecordManager());
+			ua = new UserAgent(new PhoneSipListener(), config, new FileLogger(
+					null), new RecordManager());
 		} catch (SocketException e) {
 			throw new PhoneException("Failed creating Phone", e);
 		}
@@ -63,13 +63,15 @@ public class Phone {
 			completed = registerLatch.await(5, TimeUnit.SECONDS);
 			if (completed) {
 				if (!registerSuccess) {
-					throw new PhoneException("Register User Agent with asterisk fail");
+					throw new PhoneException(
+							"Register User Agent with asterisk fail");
 				}
 			} else {
 				throw new PhoneException("Register timeout");
 			}
 		} catch (Exception e) {
-			throw new PhoneException("Register User Agent with asterisk fail", e);
+			throw new PhoneException("Register User Agent with asterisk fail",
+					e);
 		}
 	}
 
@@ -78,7 +80,8 @@ public class Phone {
 		try {
 			ua.unregister();
 		} catch (SipUriSyntaxException e) {
-			throw new PhoneException("Unregister User Agent with asterisk fail", e);
+			throw new PhoneException(
+					"Unregister User Agent with asterisk fail", e);
 		}
 	}
 
@@ -93,8 +96,8 @@ public class Phone {
 		ringLatch = null;
 		activeCallReq = null;
 		try {
-			ua = new UserAgent(new PhoneSipListener(), config, new FileLogger(null),
-					new RecordManager());
+			ua = new UserAgent(new PhoneSipListener(), config, new FileLogger(
+					null), new RecordManager());
 			ua.register();
 		} catch (Exception e) {
 			throw new PhoneException("Reset phone fail", e);
@@ -109,7 +112,7 @@ public class Phone {
 
 	@Synchronized
 	public void dialSip(String sipAddr) {
-		if (activeCallReq != null){
+		if (activeCallReq != null) {
 			throw new PhoneException("busy with another call");
 		}
 		if (!sipAddr.startsWith("sip:")) {
@@ -128,7 +131,6 @@ public class Phone {
 			if (!ringLatch.await(10, TimeUnit.SECONDS)) {
 				activeCallReq = null;
 				ringLatch = null;
-				rethrow("dial timeout");
 			}
 		} catch (InterruptedException e) {
 			throw new PhoneException("InterruptedException", e);
@@ -140,17 +142,8 @@ public class Phone {
 		if (activeCallReq != null) {
 			ua.terminate(activeCallReq);
 			activeCallReq = null;
-		} else {
 		}
 	}
-
-	private void rethrow(String msg) {
-		// logger.error(msg);
-		System.out.println("error -- " + msg);
-		throw new PhoneException(msg);
-	}
-
-	// Getters
 
 	public String getUser() {
 		return config.getUserPart();
@@ -224,29 +217,39 @@ public class Phone {
 		this.ua.close();
 	}
 
-	public void recordCall(String number) {
+	public Result validateNumber(String number, boolean persistCall) {
+
+		float bestSimilarity = 0;
+		StringBuilder log = new StringBuilder("Number: " + number);
 
 		RecordManager recordManager = (RecordManager) ua.getSoundManager();
 		byte[] readData = recordManager.readData();
 		if (readData != null) {
 			Wave wave = new Wave(new WaveHeader(), readData);
-			if (this.persistRecordCalls) {
+			if (persistCall) {
 				WaveFileManager waveFileManager = new WaveFileManager();
 				waveFileManager.setWave(wave);
-				waveFileManager.saveWaveAsFile("recordCalls/"+number+".wav");
+				waveFileManager
+						.saveWaveAsFile("recordCalls/" + number + ".wav");
 			}
-			
+
 			FingerprintManager fingerprintManager = new FingerprintManager();
 			byte[] fingerprint = fingerprintManager.extractFingerprint(wave);
-			
+
 			for (byte[] invalidFingerprint : invalidFingerprints) {
-				FingerprintSimilarityComputer fingerprintSimilarityComputer = new FingerprintSimilarityComputer(fingerprint, invalidFingerprint);
-				FingerprintSimilarity fingerprintsSimilarity = fingerprintSimilarityComputer.getFingerprintsSimilarity();
+				FingerprintSimilarityComputer fingerprintSimilarityComputer = new FingerprintSimilarityComputer(
+						fingerprint, invalidFingerprint);
+				FingerprintSimilarity fingerprintsSimilarity = fingerprintSimilarityComputer
+						.getFingerprintsSimilarity();
 				float similarity = fingerprintsSimilarity.getSimilarity();
-				float score = fingerprintsSimilarity.getScore();
-				System.out.println("Similarity :" +similarity);
-				System.out.println("Score :" +score);
+				log.append("--");
+				log.append(similarity);
+				bestSimilarity = similarity > bestSimilarity ? similarity
+						: bestSimilarity;
 			}
+
+			Result.getResult(bestSimilarity);
 		}
+		return Result.INVALID;
 	}
 }
