@@ -1,8 +1,17 @@
 package option;
 
+import java.awt.Color;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 import net.sourceforge.peers.JavaConfig;
 import net.sourceforge.peers.media.MediaMode;
@@ -25,12 +34,14 @@ public class PhoneManager {
 	}
 	private Phone phone;
 	private String prefix;
-	private OutputFrame outputFrame;
-	
+	private OutputFrame console;
+	private int cantCalls;
+	private int processedCalls;
 	private static PhoneManager instance;
 	
 	private PhoneManager(){
 		this.phone = new Phone(this.createJavaConfig());
+		this.phone.register();
 	};
 	
 	public static PhoneManager getInstance(){
@@ -40,7 +51,8 @@ public class PhoneManager {
 		return instance;
 	}
 	
-	public void callConsecutive(String prefix, String first, int cant, boolean persist){
+	public void callConsecutive(String prefix, String first, int cant, boolean persist, OutputFrame console){
+		this.console = console;
 		List<String> res = new ArrayList<String>();
 		String realFirst = prefix+first;
 		String zeros = "";
@@ -57,21 +69,26 @@ public class PhoneManager {
 		callAndAnalize(res, persist);
 	}
 	
-	public void callList(String prefix, List<String> list, boolean persist){
+	public void callList(String prefix, String inputNumbers, boolean persist, OutputFrame console){
+		this.console = console;
+		String[] split = inputNumbers.split(",|\\s|/n");
 		List<String> res = new ArrayList<String>();
-		for (String elem: list){
-			res.add(prefix+elem);
+		for (String elem: split){
+			if (!elem.trim().equals("")){
+				res.add(prefix+elem);
+			}
 		}
 		callAndAnalize(res, persist);
 	}
 	
 	public void callAndAnalize(List<String> numberList, boolean persist){
-		
+		this.cantCalls=numberList.size();
 		// register phone
-		this.phone.register();
+
 		
 		for (String number : numberList) {
 			try {
+				this.addProcessing(number);
 				this.phone.dial(number);
 				Thread.sleep(15000);
 				phone.hangUp();
@@ -88,7 +105,36 @@ public class PhoneManager {
 		this.finish();
 	}
 	
+	public void addProcessing(String number){
+//		this.console.getProgressBar().setValue((processedCalls/cantCalls)*100);
+//		String text = this.console.textPane.getText();
+//		String replace = (!text.equals(""))? text + "/nProcesando... "+number : "Procesando... "+number;
+//		this.console.textPane.setVisible(false);
+//		this.console.textPane.setText(replace);
+//		this.console.textPane.setVisible(true);
+		JTextPane textPane = this.console.textPane;
+		console.setVisible(false);
+		
+		StyledDocument doc = textPane.getStyledDocument();
+		Style style = textPane.addStyle("I'm a Style", null);
+		StyleConstants.setForeground(style, Color.black);
+
+		try {
+			doc.insertString(doc.getLength(), "<h1>Procesando... </h1>"+number, style);
+		} catch (BadLocationException e) {
+		}
+		console.setVisible(true);
+		
+//		StringBuilder buildSomething;
+//		textPane.setText(buildSomething.toString());
+	}
+	
 	public void addResult(String number, Result result){
+//		this.console.getProgressBar().setValue((processedCalls/cantCalls)*100);
+//		String replace = this.console.textPane.getText().replace("Procesando... "+number, "- " + number + "/t" + result.name() );
+//		this.console.textPane.setVisible(false);
+//		this.console.textPane.setText(replace);
+//		this.console.textPane.setVisible(true);
 		
 	}
 	

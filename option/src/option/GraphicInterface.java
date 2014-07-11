@@ -23,12 +23,19 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
 
+import javax.swing.JCheckBox;
+
 public class GraphicInterface extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField textField_first;
 	private JTextField textField_quantity;
 	private JTextField textField;
+	private JTextField textField_prefix_list;
+	private JCheckBox chckbx_grabar_consecutive;
+	private JTextArea textArea_input_list;
+	private JCheckBox chckbx_grabar_list;
+	private JButton button_list;
 
 	/**
 	 * Launch the application.
@@ -53,7 +60,7 @@ public class GraphicInterface extends JFrame {
 		setTitle("Obdulio phone validator");
 		setIconImage(Toolkit.getDefaultToolkit().getImage(GraphicInterface.class.getResource("/images/icon.png")));
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 300, 461);
+		setBounds(100, 100, 327, 461);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
@@ -113,7 +120,12 @@ public class GraphicInterface extends JFrame {
 			public void mouseClicked(MouseEvent arg0) {
 				int cant = new Integer(textField_quantity.getText());
 				PhoneManager instance = PhoneManager.getInstance();
-				instance.callConsecutive(textField.getText(),textField_first.getText(), cant,true);
+				boolean persist = chckbx_grabar_consecutive.isSelected();
+				String first = textField_first.getText();
+				String prefix = textField.getText();
+				OutputFrame console = new OutputFrame();
+				console.setVisible(true);
+				instance.callConsecutive(prefix, first, cant, persist,console);
 			}
 		});
 		
@@ -125,6 +137,17 @@ public class GraphicInterface extends JFrame {
 		textField.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		tab_consecutive.add(textField, "6, 8, left, default");
 		textField.setColumns(10);
+		
+		JLabel lblGrabarLlamadas = new JLabel("Grabar llamadas:");
+		lblGrabarLlamadas.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblGrabarLlamadas.setFont(new Font("Tahoma", Font.BOLD, 14));
+		tab_consecutive.add(lblGrabarLlamadas, "4, 10");
+		
+		chckbx_grabar_consecutive = new JCheckBox("");
+		chckbx_grabar_consecutive.setHorizontalTextPosition(SwingConstants.LEFT);
+		chckbx_grabar_consecutive.setHorizontalAlignment(SwingConstants.LEFT);
+		chckbx_grabar_consecutive.setFont(new Font("Tahoma", Font.BOLD, 14));
+		tab_consecutive.add(chckbx_grabar_consecutive, "6, 10");
 		btnNewButton.setVerticalAlignment(SwingConstants.TOP);
 		btnNewButton.setVerticalTextPosition(SwingConstants.BOTTOM);
 		btnNewButton.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -137,8 +160,50 @@ public class GraphicInterface extends JFrame {
 		tabbedPane.addTab("Lista", null, tab_list, "Llamar a una lista de numeros");
 		tab_list.setLayout(null);
 		
-		JTextArea textArea_input = new JTextArea();
-		textArea_input.setBounds(10, 11, 249, 363);
-		tab_list.add(textArea_input);
+		textArea_input_list = new JTextArea();
+		textArea_input_list.setBounds(10, 48, 276, 262);
+		tab_list.add(textArea_input_list);
+		
+		JLabel lblNewLabel_1 = new JLabel("Prefijo:");
+		lblNewLabel_1.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblNewLabel_1.setBounds(10, 11, 58, 14);
+		tab_list.add(lblNewLabel_1);
+		
+		textField_prefix_list = new JTextField();
+		textField_prefix_list.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		textField_prefix_list.setBounds(77, 10, 43, 20);
+		tab_list.add(textField_prefix_list);
+		textField_prefix_list.setColumns(10);
+		
+		chckbx_grabar_list = new JCheckBox("Grabar llamadas: ");
+		chckbx_grabar_list.setHorizontalTextPosition(SwingConstants.LEFT);
+		chckbx_grabar_list.setFont(new Font("Tahoma", Font.BOLD, 14));
+		chckbx_grabar_list.setHorizontalAlignment(SwingConstants.RIGHT);
+		chckbx_grabar_list.setBounds(126, 7, 164, 23);
+		tab_list.add(chckbx_grabar_list);
+		
+		button_list = new JButton("");
+		button_list.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				PhoneManager instance = PhoneManager.getInstance();
+				boolean persist = chckbx_grabar_list.isSelected();
+				String inputNumbers = textArea_input_list.getText();
+				String prefix = textField_prefix_list.getText();
+				OutputFrame console = new OutputFrame();
+				console.setVisible(true);
+				
+				instance.callList(prefix, inputNumbers, persist,console);
+			}
+		});
+		button_list.setIcon(new ImageIcon(GraphicInterface.class.getResource("/images/iconButton2.png")));
+		button_list.setVerticalTextPosition(SwingConstants.BOTTOM);
+		button_list.setVerticalAlignment(SwingConstants.TOP);
+		button_list.setToolTipText("Comenzar!");
+		button_list.setHorizontalTextPosition(SwingConstants.CENTER);
+		button_list.setHorizontalAlignment(SwingConstants.LEFT);
+		button_list.setBounds(209, 321, 77, 53);
+		tab_list.add(button_list);
 	}
 }

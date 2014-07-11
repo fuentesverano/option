@@ -9,10 +9,14 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
+import java.awt.Font;
+import java.awt.Dimension;
 
 public class OutputFrame extends JFrame {
 
 	private JPanel contentPane;
+	public JProgressBar progressBar;
+	public JTextPane textPane;
 
 	/**
 	 * Launch the application.
@@ -41,10 +45,15 @@ public class OutputFrame extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 		
-		JProgressBar progressBar = new JProgressBar();
+		progressBar = new JProgressBar();
+		progressBar.setPreferredSize(new Dimension(146, 30));
+		progressBar.setMaximumSize(new Dimension(32767, 40));
+		progressBar.setFont(new Font("Tahoma", Font.PLAIN, 17));
 		contentPane.add(progressBar, BorderLayout.NORTH);
 		
-		JTextPane textPane = new JTextPane();
+		textPane = new JTextPane();
+		textPane.setContentType("text/html");
+		textPane.setEditable(false);
 		contentPane.add(textPane, BorderLayout.CENTER);
 	}
 
