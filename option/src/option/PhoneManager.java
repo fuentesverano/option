@@ -41,11 +41,28 @@ public class PhoneManager {
 	}
 	
 	public void callConsecutive(String prefix, String first, int cant, boolean persist){
-		List<String> list = new ArrayList<String>();
+		List<String> res = new ArrayList<String>();
+		String realFirst = prefix+first;
+		String zeros = "";
+		while(realFirst.startsWith("0")){
+			zeros+="0";
+			realFirst = realFirst.substring(1);
+		}
+		String currentNumber = realFirst;
+		for(int i = 0; i<cant; i++){
+			String toAdd = zeros + currentNumber;
+			res.add(toAdd);
+			currentNumber = String.valueOf(Integer.parseInt(currentNumber) + 1);
+		}
+		callAndAnalize(res, persist);
 	}
 	
 	public void callList(String prefix, List<String> list, boolean persist){
-		
+		List<String> res = new ArrayList<String>();
+		for (String elem: list){
+			res.add(prefix+elem);
+		}
+		callAndAnalize(res, persist);
 	}
 	
 	public void callAndAnalize(List<String> numberList, boolean persist){
@@ -89,9 +106,9 @@ public class PhoneManager {
 			javaConfig.setUserPart("6002");
 			javaConfig.setPassword("unsecurepassword");
 
-			javaConfig.setDomain("192.168.1.102");
+			javaConfig.setDomain("192.168.1.106");
 			javaConfig.setLocalInetAddress(InetAddress
-					.getByName("192.168.1.104"));
+					.getByName("192.168.1.105"));
 			javaConfig.setMediaDebug(false);
 			javaConfig.setMediaMode(MediaMode.captureAndPlayback);
 			javaConfig.setOutboundProxy(null);

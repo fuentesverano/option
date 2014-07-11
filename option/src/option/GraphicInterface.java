@@ -121,7 +121,8 @@ public class GraphicInterface extends JFrame {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				int cant = new Integer(textField_quantity.getText());
-				PhoneManager.getInstance().callConsecutive(textField.getText(),textField_first.getText(), cant,true);
+				PhoneManager instance = PhoneManager.getInstance();
+				instance.callConsecutive(textField.getText(),textField_first.getText(), cant,true);
 			}
 		});
 		
