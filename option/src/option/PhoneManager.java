@@ -108,7 +108,7 @@ public class PhoneManager {
 
 			javaConfig.setDomain("192.168.1.106");
 			javaConfig.setLocalInetAddress(InetAddress
-					.getByName("192.168.1.105"));
+					.getByName("192.168.1.104"));
 			javaConfig.setMediaDebug(false);
 			javaConfig.setMediaMode(MediaMode.captureAndPlayback);
 			javaConfig.setOutboundProxy(null);

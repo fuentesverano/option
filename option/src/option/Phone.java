@@ -248,6 +248,7 @@ public class Phone {
 						: bestSimilarity;
 			}
 
+			System.out.println(log.toString());
 			Result.getResult(bestSimilarity);
 		}
 		return Result.INVALID;
